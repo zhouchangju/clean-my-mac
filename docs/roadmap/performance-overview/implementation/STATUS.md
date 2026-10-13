@@ -55,3 +55,19 @@ UI与额外宿主校准将作为下一功能提交；不暂存另一AI的未跟�
 为后续隐藏/资源验证新增-lmcUITest且-lmcPerformanceDiagnostics双开关，仅写本应用自建LMC-UI-*目录中的0600 performance-diagnostics.jsonl。数据只有本App pid/seq/订阅数/可见标题窗口数/扫描与准备状态/采样进程数/路由，不含进程名称或命令参数。追加记录不覆盖旧证据。最新诊断版本已build，未launch；本轮所有旧trace/review进程已结束，当前没有本轮活跃App/collector。
 
 下一步：检查另一AI当前UI job与源改动；用最新main binary复制distinct performance-review bundle，带两个测试flag启动，查其自建目录log。用日志区分真正关窗和CUA自动重开，验证零订阅停止及重开；正常菜单/设置开关与扫描并行，30次面板/50次切页与5min×3资源模式，辅助功能/多屏、第三模块mock和最终18AC归档。再解决共享App基线提交与最终同源制品。不要把本轮原生分项或17tests记为全面完成。
+
+## 2026-10-13 本轮续接点：资源采集中
+
+当前实际进程：独立performance-review bundle PID28834，参数-lmcUITest -lmcPerformanceDiagnostics；没有打开真实用户索引。最新源码35文件hash在.local/performance-overview/current-source-before-build.json，build前后核对相同，current-build.log成功。
+
+诊断路径/句柄：.local/performance-overview/active-diagnostics.json指向自建LMC-UI-E9CA924A-A235-4F76-84A9-03CC452FAC50/performance-diagnostics.jsonl。先读该文件和ps验证PID/command，不创建第二collector。
+
+存储页baseline已完成，工具会话91063 exit0；实际300.0137秒、61样本、平均CPU0.0533%、RSS中位90.94MiB/最高93.06MiB、sequence始终0、subscriber0。原始resource-storage-baseline.json/jsonl。
+
+详情资源collector工具会话81046，确认running：命令python3 .local/performance-overview/collect_resources.py detail --subscribers 1 --route performance --duration 930。当前默认完整进程排行、未搜索，记录每5秒；详情首105秒样本已有1个订阅、进程约1011、sequence54。继续轮询原handle；完成将生成resource-detail.json三组真实至少300秒区间。collector记录mode变化或源stale会终止并留failure，不能凭一次观察timeout重启。期间不要切换本App页面/菜单，否则详情数据失效。
+
+扩展边界：临时副本添加第三摘要/独立路由/详情；Core/Domain/Platform所有文件hash不变，18项实际测试通过。production未加入测试功能；见EXTENSION-PROOF.md与私有extension-example-tests.log。
+
+后续：detail完结后读三段CPU/RSS，接着overview（主窗口storage，打开面板，subscriber1，route storage）和both（性能页+面板，subscriber2，route performance），各930秒；hidden关窗需先从日志确认visible0/subscriber0，不调用CUA AX读取（可能重开），至少310秒。另补30次面板首画/50次切页、设置/重开/扫描并行/辅助功能/多屏、最终18AC审计及共享App基线提交。不要把存储baseline当hidden，也不要把临时扩展编译当生产存在第三功能。
+
+本轮没有源码修改，只有验证与文档命令路径纠正。goal仍active，没有交人工验收。会话累计>50万token，已提醒用户/compact；压缩后按当前状态与实时工作区续接。

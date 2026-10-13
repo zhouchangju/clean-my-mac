@@ -44,8 +44,8 @@
 
 以下只作为后续建议命令，不是本轮执行记录：
 ```sh
-swift test --filter PerformanceCoreTests
-swift test --filter PerformancePlatformTests
+swift test --package-path Packages/Performance --scratch-path .local/build-performance-package --filter PerformanceCoreTests
+swift test --package-path Packages/Performance --scratch-path .local/build-performance-package --filter PerformancePlatformTests
 swift test
 xcodebuild -project App/LocalMacCleaner.xcodeproj -scheme LocalMacCleaner -configuration Debug -destination 'platform=macOS' -derivedDataPath .local/build-performance-overview CODE_SIGN_IDENTITY=- test
 LMC_DERIVED_DATA=.local/build-performance-overview-release scripts/build-app.sh
