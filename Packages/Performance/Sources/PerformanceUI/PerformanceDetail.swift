@@ -10,6 +10,16 @@ public struct PerformanceDetail: View {
     @State private var visible = false
     public init(controller: PerformanceController) { self.controller = controller }
 
+    private var freshnessDates: [Date] {
+        let now = Date()
+        let dates = controller.rankedProcesses(search: search, sort: sort).flatMap { row in
+            FreshnessUpdates.dates(row.cpuPercent, now: now, threshold: controller.freshnessSeconds)
+            + FreshnessUpdates.dates(row.residentBytes, now: now, threshold: controller.freshnessSeconds)
+            + FreshnessUpdates.dates(row.footprintBytes, now: now, threshold: controller.freshnessSeconds)
+        }
+        return [now] + Array(Set(dates)).sorted()
+    }
+
     public var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -32,7 +42,7 @@ public struct PerformanceDetail: View {
             if let issue = controller.snapshot.processIssue {
                 Label(issue, systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
             }
-            TimelineView(.periodic(from: .now, by: 1)) { _ in
+            TimelineView(.explicit(freshnessDates)) { _ in
                 let now = Date()
                 VStack(spacing: 0) {
                     HStack {

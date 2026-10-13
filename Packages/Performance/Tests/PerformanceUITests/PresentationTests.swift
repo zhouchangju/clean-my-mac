@@ -49,3 +49,17 @@ import PerformanceDomain
     #expect(controller.rankingComputationCount == 3)
     await controller.shutdown()
 }
+
+@Test func freshnessUpdatesScheduleExpirationWithoutPeriodicPolling() {
+    let sampled = Date(timeIntervalSince1970: 100)
+    let now = Date(timeIntervalSince1970: 102)
+    let metric = Metric<Double>.measured(1, at: sampled, source: "fixture")
+    let dates = FreshnessUpdates.dates(metric, now: now, threshold: 6)
+    #expect(dates == [Date(timeIntervalSince1970: 106.001)])
+    #expect(FreshnessUpdates.dates(metric, now: Date(timeIntervalSince1970: 107), threshold: 6).isEmpty)
+    let failed = Metric<Double>.unavailable(.failed, source: "fixture", reason: "failure").preservingLastMeasurement(from: metric)
+    #expect(FreshnessUpdates.dates(failed, now: now, threshold: 6) == dates)
+    let future = Metric<Double>.measured(1, at: Date(timeIntervalSince1970: 110), source: "fixture")
+    #expect(FreshnessUpdates.dates(future, now: now, threshold: 6).count == 2)
+    #expect(FreshnessUpdates.dates(Metric<Double>.unavailable(.unknown, source: "fixture", reason: "missing"), now: now, threshold: 6).isEmpty)
+}

@@ -1,6 +1,18 @@
 import SwiftUI
 import PerformanceDomain
 
+/// Refresh only when time can change a label. New samples independently redraw
+/// through Observation; a stalled sampler still gets its expiration repaint.
+enum FreshnessUpdates {
+    static func dates<T>(_ metric: Metric<T>?, now: Date, threshold: TimeInterval) -> [Date] {
+        guard let metric else { return [] }
+        let sampledAt = metric.value == nil ? metric.lastKnownAt : metric.sampledAt
+        guard let sampledAt else { return [] }
+        let expires = sampledAt.addingTimeInterval(threshold + 0.001)
+        return [sampledAt, expires].filter { $0 > now }
+    }
+}
+
 enum MetricText {
     static func bytes(_ value: UInt64) -> String {
         ByteCountFormatter.string(fromByteCount: Int64(clamping: value), countStyle: .binary)
@@ -70,10 +82,20 @@ public struct OverviewPanel: View {
         self.controller = controller; self.onQuit = onQuit
     }
     public var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { _ in
+        TimelineView(.explicit(freshnessDates)) { _ in
             ScrollView { content(now: Date()) }
         }
         .frame(width: 400, height: 500)
+    }
+
+    private var freshnessDates: [Date] {
+        let now = Date()
+        let system = controller.snapshot.system
+        let dates = FreshnessUpdates.dates(system?.cpuPercent, now: now, threshold: controller.freshnessSeconds)
+            + FreshnessUpdates.dates(system?.memoryUsedBytes, now: now, threshold: controller.freshnessSeconds)
+            + FreshnessUpdates.dates(system?.memoryTotalBytes, now: now, threshold: controller.freshnessSeconds)
+            + FreshnessUpdates.dates(controller.snapshot.volume?.availableBytes, now: now, threshold: 30)
+        return [now] + Array(Set(dates)).sorted()
     }
 
     private func content(now: Date) -> some View {
