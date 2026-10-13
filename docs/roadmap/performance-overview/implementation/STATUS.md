@@ -71,3 +71,13 @@ UI与额外宿主校准将作为下一功能提交；不暂存另一AI的未跟�
 后续：detail完结后读三段CPU/RSS，接着overview（主窗口storage，打开面板，subscriber1，route storage）和both（性能页+面板，subscriber2，route performance），各930秒；hidden关窗需先从日志确认visible0/subscriber0，不调用CUA AX读取（可能重开），至少310秒。另补30次面板首画/50次切页、设置/重开/扫描并行/辅助功能/多屏、最终18AC审计及共享App基线提交。不要把存储baseline当hidden，也不要把临时扩展编译当生产存在第三功能。
 
 本轮没有源码修改，只有验证与文档命令路径纠正。goal仍active，没有交人工验收。会话累计>50万token，已提醒用户/compact；压缩后按当前状态与实时工作区续接。
+
+## 最新：详情资源FAIL及排行缓存修复
+
+旧collector81046已exit1，非running。诊断源>10秒stale触发，原App PID28834仍活着并持续恢复日志；不能按失败collector再起重复。第一有效300.90秒段CPU5.65%（超过3%预算，FAIL），RSS中位107.31MiB/最高123.45MiB；仅一段有效，不是3组PASS。
+
+sample 3秒指向每秒Timeline重排完整进程样本；新增controller ranking cache，新样本/search/sort变化失效，时效tick复用。Release18实际tests通过，宿主CPU校准改独立API前后上下界避开全进程枚举时间窗偏差。见AUDIT-REMEDIATION.md与所有保留日志。
+
+新main-build-ranking-cache正在build（本轮结束后查进程/日志），未launch新版本；PID28834仍是旧binary。切换前确认另一AI UI job已结束，再只正常退出/停止本轮精确private review进程。新资源验证要新源hash、新binary；不得继承旧基线/18测试当全部软件PASS。goal active。
+
+排行缓存修复的新main-build-ranking-cache.log已BUILD SUCCEEDED；原runtime PID28834仍旧binary，未启动新版本或新collector。18项Release tests已通过，新资源预算仍需fresh runtime复验。

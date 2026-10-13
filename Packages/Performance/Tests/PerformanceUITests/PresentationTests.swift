@@ -35,3 +35,17 @@ import PerformanceDomain
     #expect(failed.quality == .failed)
     #expect(failed.lastKnownAt == date)
 }
+
+@Test @MainActor func freshnessRepaintsReuseRankingButChangedInputsRecompute() async throws {
+    let name = "test-only.ranking." + UUID().uuidString
+    let preferences = try #require(UserDefaults(suiteName: name))
+    defer { preferences.removePersistentDomain(forName: name) }
+    let controller = PerformanceController(preferences: preferences)
+    for _ in 0..<60 { _ = controller.rankedProcesses(search: "", sort: .cpu) }
+    #expect(controller.rankingComputationCount == 1)
+    _ = controller.rankedProcesses(search: "worker", sort: .cpu)
+    #expect(controller.rankingComputationCount == 2)
+    _ = controller.rankedProcesses(search: "worker", sort: .footprint)
+    #expect(controller.rankingComputationCount == 3)
+    await controller.shutdown()
+}

@@ -44,7 +44,7 @@ public struct PerformanceDetail: View {
                     Divider()
                     ScrollView {
                         LazyVStack(spacing: 4) {
-                            ForEach(ProcessRanking.rows(controller.snapshot.processes, search: search, sort: sort)) { row in
+                            ForEach(controller.rankedProcesses(search: search, sort: sort)) { row in
                                 HStack {
                                     VStack(alignment: .leading) {
                                         Text(row.name).lineLimit(2)

@@ -36,6 +36,8 @@ public final class PerformanceController {
     public var navigate: (@MainActor (UtilityRoute) -> Void)?
     public var freshnessSeconds: TimeInterval { max(6, intervalSeconds * 3) }
     private let preferences: UserDefaults
+    @ObservationIgnored private var rankingCache: (search: String, sort: ProcessSort, rows: [ProcessSnapshot])?
+    @ObservationIgnored private(set) var rankingComputationCount = 0
     public let session: SamplingSession
     private var observers: [NSObjectProtocol] = []
 
@@ -60,9 +62,22 @@ public final class PerformanceController {
         let lease = await session.acquire(consumerID: consumerID, demand: demand, renewingExisting: true)
         for await value in lease.snapshots {
             guard !Task.isCancelled else { break }
-            if value.sequence >= snapshot.sequence { snapshot = value }
+            if value.sequence >= snapshot.sequence {
+                rankingCache = nil
+                snapshot = value
+            }
         }
         await session.release(lease.id)
+    }
+
+    /// The one-second freshness clock only formats the visible rows. It must not
+    /// repeatedly sort the complete process sample while its inputs are unchanged.
+    public func rankedProcesses(search: String, sort: ProcessSort) -> [ProcessSnapshot] {
+        if let cache = rankingCache, cache.search == search, cache.sort == sort { return cache.rows }
+        let rows = ProcessRanking.rows(snapshot.processes, search: search, sort: sort)
+        rankingCache = (search, sort, rows)
+        rankingComputationCount += 1
+        return rows
     }
 
     public func open(_ route: UtilityRoute) {

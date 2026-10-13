@@ -27,6 +27,8 @@ import PerformanceCore
 
 @Test func hostCPUTimeUnitsMatchIndependentGetrusage() async throws {
     let sampler = MacPerformanceSampler()
+    var firstLower = rusage()
+    #expect(getrusage(RUSAGE_SELF, &firstLower) == 0)
     let first = await sampler.readProcesses()
     let before = try #require(first.processes.first { $0.pid == getpid() }?.cpuNanoseconds)
     var r1 = rusage()
@@ -35,6 +37,8 @@ import PerformanceCore
     var result = 1.0
     while ContinuousClock.now < deadline { result = sin(result) + 1.1 }
     #expect(result.isFinite)
+    var secondLower = rusage()
+    #expect(getrusage(RUSAGE_SELF, &secondLower) == 0)
     let second = await sampler.readProcesses()
     let after = try #require(second.processes.first { $0.pid == getpid() }?.cpuNanoseconds)
     var r2 = rusage()
@@ -43,10 +47,15 @@ import PerformanceCore
         Double(r.ru_utime.tv_sec + r.ru_stime.tv_sec) * 1_000_000_000
             + Double(r.ru_utime.tv_usec + r.ru_stime.tv_usec) * 1_000
     }
-    let independent = ns(r2) - ns(r1)
-    #expect(independent > 10_000_000)
-    let ratio = Double(after - before) / independent
-    #expect(ratio > 0.8 && ratio < 1.2)
+    // A full-process enumeration reads our PID at an unspecified position.
+    // Bracket both reads with an independent API instead of attributing the
+    // enumeration's tail CPU time to the 250-ms load window.
+    let delta = Double(after - before)
+    let lower = ns(secondLower) - ns(r1)
+    let upper = ns(r2) - ns(firstLower)
+    #expect(lower > 10_000_000)
+    #expect(delta >= lower - 1_000_000)
+    #expect(delta <= upper + 1_000_000)
 }
 
 @Test func hostSystemCPUUsesActualTickDeltas() async throws {
