@@ -99,3 +99,13 @@ collector34368已exit0，完成930.01秒；不是running，不重复启动。res
 新sample50114 3秒保留detail-cache-runtime-sample.txt。完整排行重算路径从早先747份主要栈降到22份（不同瞬时窗口，不是正式成本比例）；剩余SwiftUI布局/刷新还需定位。PID50114仍旧缓存版App存活、性能页1订阅，当前没有collector。换版本前验证精确进程，避免触及另一AI。
 
 本轮50原生切换与resource结果已取得，尚未完成CPU修复/所有验收，goal保持active；下一步针对新sample确定第二批最小优化，再18tests/newbuild/new runtime重复3组，原FAIL全部保留。
+
+## 需要压缩后续接
+
+全局AGENTS规定上下文超过约450k提醒人工/compact；已连续多次提醒但自动goal续接仍携带超长上下文。当前可靠执行受上下文限制，需要用户执行/compact后恢复，不是软件目标完成，也不是把CPU预算降低。
+
+最新正式源码仍40eec82排序缓存版本；18项测试/主App构建通过，CPU3组FAIL保留。剩余开销sample在detail-cache-runtime-sample.txt；接下来需针对剩余SwiftUI刷新/布局做最小修复，保持采样2秒及详情3%预算。没有根据猜测新增第二批源码。
+
+collector34368终态exit0；旧81046终态exit1。PID50114精确身份核对后仅本轮私有测试App被SIGTERM；没有终止另一AI进程。恢复前重新核对进程和当前工作区，不按旧PID启动重复采集。
+
+完整待验收项仍见上文：overview/both/hidden资源、菜单30次首画、设置/重开/扫描并行/辅助功能/多屏、最终18AC和共享基线/同源制品。50次原生切换已验证，增长内存的同系列稳定前值尚缺，不能强记PASS。
