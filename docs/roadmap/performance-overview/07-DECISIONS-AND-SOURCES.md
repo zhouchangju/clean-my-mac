@@ -51,3 +51,7 @@
 ## 实施调整（2026-10-13）
 
 用户明确授权现在开始且定期检查冲突。为避免修改另一AI正使用的根manifest及存储模块，性能放入Packages/Performance本地package，并独立scratch验证；仍是一个仓库，主App后续引用产品。当前只提交本轮文件。菜单改用NSStatusItem+NSPopover，显式可见性委托与关闭销毁内容；SwiftUI卡片保持复用。开发预览为验证入口，不是第二个交付产品。
+
+失败读数保留独立lastKnownValue/lastKnownAt和当前失败质量，历史值显式标注。刷新间隔2/5/10秒立即生效；CPU/内存时效为配置间隔3倍，默认6秒。主App根源已转async index，初始化生命周期归App，页面切换不重复初始化。
+
+[Apple TimelineView.Context.date](https://developer.apple.com/documentation/swiftui/timelineview/context/date)说明其是调度触发时间、可能早于实际绘制；当前数据时效用实际Date()，Timeline只负责触发刷新。

@@ -60,3 +60,19 @@ private func row(_ pid: Int32, start: UInt64?, cpu: UInt64?, name: String = "wor
     let decoded = try JSONDecoder().decode(Metric<Double>.self, from: JSONEncoder().encode(m))
     #expect(decoded.value == 0)
 }
+
+@Test func failedMeasurementRetainsClearlySeparateLastKnownValue() throws {
+    let date = Date(timeIntervalSince1970: 100)
+    let good = Metric<UInt64>.measured(0, at: date, source: "volume")
+    let failed = Metric<UInt64>.unavailable(.failed, source: "volume", reason: "read failed").preservingLastMeasurement(from: good)
+    #expect(failed.value == nil)
+    #expect(failed.quality == .failed)
+    #expect(failed.lastKnownValue == 0)
+    #expect(failed.lastKnownAt == date)
+    let second = Metric<UInt64>.unavailable(.failed, source: "volume", reason: "failed again").preservingLastMeasurement(from: failed)
+    #expect(second.lastKnownAt == date)
+    let otherSource = Metric<UInt64>.unavailable(.failed, source: "other-volume", reason: "failed").preservingLastMeasurement(from: good)
+    #expect(otherSource.lastKnownValue == nil)
+    let decoded = try JSONDecoder().decode(Metric<UInt64>.self, from: JSONEncoder().encode(failed))
+    #expect(decoded.quality == .failed && decoded.lastKnownValue == 0)
+}

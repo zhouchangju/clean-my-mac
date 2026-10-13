@@ -30,7 +30,7 @@ public actor SamplingSession {
         let stream: AsyncStream<PerformanceSnapshot>
     }
     private let sampler: any PerformanceSampler
-    private let interval: Duration
+    private var interval: Duration
     private let volumeInterval: Duration
     private let clock = ContinuousClock()
     private var subscriptions: [UUID: Subscription] = [:]
@@ -50,20 +50,25 @@ public actor SamplingSession {
         self.volumeInterval = max(.milliseconds(1), volumeInterval)
     }
 
-    public func acquire(consumerID: UUID, demand: SamplingDemand) -> SamplingLease {
+    public func acquire(consumerID: UUID, demand: SamplingDemand, renewingExisting: Bool = false) -> SamplingLease {
+        if stopped || Task.isCancelled {
+            let pair = AsyncStream<PerformanceSnapshot>.makeStream(bufferingPolicy: .bufferingNewest(1))
+            pair.continuation.finish()
+            return SamplingLease(id: UUID(), snapshots: pair.stream)
+        }
         if let id = consumerLeases[consumerID], let existing = subscriptions[id] {
-            switch existing.continuation.yield(current) {
-            case .terminated: release(id)
-            case .enqueued, .dropped: return SamplingLease(id: id, snapshots: existing.stream)
-            @unknown default: release(id)
+            if renewingExisting {
+                release(id)
+            } else {
+                switch existing.continuation.yield(current) {
+                case .terminated: release(id)
+                case .enqueued, .dropped: return SamplingLease(id: id, snapshots: existing.stream)
+                @unknown default: release(id)
+                }
             }
         }
         let pair = AsyncStream<PerformanceSnapshot>.makeStream(bufferingPolicy: .bufferingNewest(1))
         let id = UUID()
-        guard !stopped else {
-            pair.continuation.finish()
-            return SamplingLease(id: id, snapshots: pair.stream)
-        }
         pair.continuation.onTermination = { [weak self] _ in
             Task { await self?.release(id) }
         }
@@ -88,6 +93,11 @@ public actor SamplingSession {
 
     public func snapshot() -> PerformanceSnapshot { current }
     public var subscriberCount: Int { subscriptions.count }
+    public func setInterval(_ value: Duration) {
+        interval = max(.milliseconds(1), value)
+        worker?.cancel()
+        ensureWorker()
+    }
 
     public func suspend() { suspended = true; invalidate() }
     public func resume() { suspended = false; ensureWorker() }
@@ -121,8 +131,11 @@ public actor SamplingSession {
             let round = generation
             let raw = await sampler.readSystem()
             guard round == generation, !Task.isCancelled else { break }
-            let system = SystemSnapshot(cpuPercent: cpu.consume(raw.ticks), memoryUsedBytes: raw.memoryUsedBytes,
-                                        memoryTotalBytes: raw.memoryTotalBytes, pressure: raw.pressure)
+            let system = SystemSnapshot(
+                cpuPercent: cpu.consume(raw.ticks).preservingLastMeasurement(from: current.system?.cpuPercent),
+                memoryUsedBytes: raw.memoryUsedBytes.preservingLastMeasurement(from: current.system?.memoryUsedBytes),
+                memoryTotalBytes: raw.memoryTotalBytes.preservingLastMeasurement(from: current.system?.memoryTotalBytes),
+                pressure: raw.pressure.preservingLastMeasurement(from: current.system?.pressure))
             var rows = current.processes
             var issue = current.processIssue
             if subscriptions.values.contains(where: { $0.demand == .detail }) {
@@ -135,8 +148,12 @@ public actor SamplingSession {
             var volume = current.volume
             if subscriptions.values.contains(where: { $0.demand == .overview }),
                lastVolumeAt == nil || lastVolumeAt!.duration(to: clock.now) >= volumeInterval {
-                volume = await sampler.readStartupVolume()
+                let latest = await sampler.readStartupVolume()
                 guard round == generation, !Task.isCancelled else { break }
+                let sameVolume = latest.volumeID == nil || latest.volumeID == current.volume?.volumeID
+                volume = .init(volumeID: latest.volumeID,
+                               availableBytes: latest.availableBytes.preservingLastMeasurement(from: sameVolume ? current.volume?.availableBytes : nil),
+                               totalBytes: latest.totalBytes.preservingLastMeasurement(from: sameVolume ? current.volume?.totalBytes : nil))
                 lastVolumeAt = clock.now
             }
             current = .init(system: system, processes: rows, volume: volume, processIssue: issue, sequence: current.sequence &+ 1)

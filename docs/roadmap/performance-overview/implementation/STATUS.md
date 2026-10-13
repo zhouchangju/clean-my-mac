@@ -1,6 +1,6 @@
 # 性能整合开发状态
 
-2026-10-13；DOING，goal active。仅已实现独立模块与开发预览，不能称主App合并完成，也尚未交人工验收。
+2026-10-13；DOING，goal active。已接入主App，功能开发与软件验收仍DOING；尚未交人工验收。
 
 ## 本轮实际进展
 
@@ -30,3 +30,16 @@ UI与额外宿主校准将作为下一功能提交；不暂存另一AI的未跟�
 先核对当前工作区与原体验v2 CONTINUATION，再读Packages/Performance源码、release-tests.log及本文件。当前独立trace预览为验证进程，工具会话33683；不要启动第二collector或把旧运行binary当新source。需换版时只结束本轮创建的预览，不操作原LocalMacCleaner进程。
 
 继续完善UI/缓存失败语义和设置；主App文件集成前重读并限定最小改动，必要时在私有copy和不同bundle下先验证，避免同bundle UI tests影响原开发。原清理Gate/schema/真实扫描保持原负责人边界。全部未验证项保持UNVERIFIED，最终完成前按PRD逐项证明。
+
+## 当前续接（以上早期记录仅作历史）
+
+- 已有主工程接入：新增App/LocalMacCleaner/PerformanceIntegration.swift；App入口4处最小挂接与本地PerformanceUI产品引用。根Package和全部清理内核不改。主入口后续被另一个AI更新为async index，保留我们的UtilityRootView/@Bindable注入。不得拿早期baseline覆盖它的新初始化代码。
+- 独立验证bundle com.localmaccleaner.performance-review，只用-lmcUITest自建目录。CUA确认统一导航与原存储界面，主动扫描32项/1缺口，菜单显示同一部分结果及已知占用/未知数；没有扫用户真实Data。
+- 发现TimelineView.context.date可能是早于新样本的调度时间，造成新样本被未来时间判断误标过期；改用实际Date()，官方依据见Apple Context.date文档。新修复仍需fresh原生复验，不能继承旧画面。
+- 新增失败数据独立lastKnownValue/lastKnownAt；质量仍failed而不是measured，不冒充0。设置立即作用于共享会话；慢间隔时效为3倍间隔（默认6秒）。NSWindow关闭/最小化/隐藏显式控制详情订阅。
+- 修复快速重开pending acquire旧观察者可能结束新stream的竞态：UI renew lease，已取消acquisition不会替换健康订阅；有受控gate独立回归。
+- Release最新17实际测试PASS，日志release-tests-current.log；App主构建main-build-async-index.log exit0。最新observationGeneration防旧存储观察者重挂的少量改动正在fresh构建（工具会话由本轮完成后更新，不将旧build继承）。
+- 对方新增preparingIndex/indexPreparationError/prepareIndex；桥接已适配准备与失败，退出等待安全准备/扫描停止；超10秒取消退出并恢复采样/入口。
+- 对方UI测试多次重启；发现live xcodebuild即停止本轮独立验证App。已精确停止本轮trace PID19168及review PID89906；两者终态，无本轮残留collector。不停止另一AI的App/test进程。
+
+剩余：最新原生性能页/跳转/关闭后重开/退出验证，17测试后同版本全清理回归、第三功能接入证明、30次首画与50次切页、5分钟×3各模式资源样本、扫描并行/多屏/辅助功能、同源最终制品与18AC逐项审计。主App接入源部分仍未跟踪，另一AI清理源仍在开发；只提交本轮独占文件，共享App源码基线提交在交接明确后处理。

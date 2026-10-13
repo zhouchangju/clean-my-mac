@@ -7,6 +7,7 @@ public struct PerformanceDetail: View {
     @State private var consumerID = UUID()
     @State private var search = ""
     @State private var sort: ProcessSort = .cpu
+    @State private var visible = false
     public init(controller: PerformanceController) { self.controller = controller }
 
     public var body: some View {
@@ -31,7 +32,8 @@ public struct PerformanceDetail: View {
             if let issue = controller.snapshot.processIssue {
                 Label(issue, systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
             }
-            TimelineView(.periodic(from: .now, by: 1)) { context in
+            TimelineView(.periodic(from: .now, by: 1)) { _ in
+                let now = Date()
                 VStack(spacing: 0) {
                     HStack {
                         Text("进程").frame(maxWidth: .infinity, alignment: .leading)
@@ -48,9 +50,9 @@ public struct PerformanceDetail: View {
                                         Text(row.name).lineLimit(2)
                                         Text("PID \(row.pid)").font(.caption).foregroundStyle(.secondary)
                                     }.frame(maxWidth: .infinity, alignment: .leading)
-                                    Text(MetricText.value(row.cpuPercent, now: context.date, threshold: 6) { String(format: "%.1f%%", $0) }).frame(width: 110, alignment: .leading)
-                                    Text(MetricText.value(row.residentBytes, now: context.date, threshold: 6, format: MetricText.bytes)).frame(width: 160, alignment: .leading)
-                                    Text(MetricText.value(row.footprintBytes, now: context.date, threshold: 6, format: MetricText.bytes)).frame(width: 180, alignment: .leading)
+                                    Text(MetricText.value(row.cpuPercent, now: now, threshold: controller.freshnessSeconds) { String(format: "%.1f%%", $0) }).frame(width: 110, alignment: .leading)
+                                    Text(MetricText.value(row.residentBytes, now: now, threshold: controller.freshnessSeconds, format: MetricText.bytes)).frame(width: 160, alignment: .leading)
+                                    Text(MetricText.value(row.footprintBytes, now: now, threshold: controller.freshnessSeconds, format: MetricText.bytes)).frame(width: 180, alignment: .leading)
                                 }.monospacedDigit().padding(12)
                                     .background(Color.secondary.opacity(0.07), in: RoundedRectangle(cornerRadius: 8))
                                     .accessibilityElement(children: .combine)
@@ -66,7 +68,11 @@ public struct PerformanceDetail: View {
                 .font(.caption).foregroundStyle(.secondary)
         }
         .padding(24)
-        .task { await controller.observe(consumerID: consumerID, demand: .detail) }
+        .background(WindowVisibility { visible = $0 }.frame(width: 0, height: 0))
+        .task(id: visible) {
+            guard visible else { return }
+            await controller.observe(consumerID: consumerID, demand: .detail)
+        }
     }
 }
 
@@ -83,7 +89,7 @@ public struct PerformanceSettings: View {
                 Picker("刷新间隔", selection: $controller.intervalSeconds) {
                     Text("2 秒").tag(2.0); Text("5 秒").tag(5.0); Text("10 秒").tag(10.0)
                 }
-                Text("间隔设置将在下次启动应用时生效。系统用量与压力是不同指标；首版不提供内存释放或进程退出。")
+                Text("间隔设置立即生效。系统用量与压力是不同指标；首版不提供内存释放或进程退出。")
             }
         }.formStyle(.grouped).padding(24)
     }

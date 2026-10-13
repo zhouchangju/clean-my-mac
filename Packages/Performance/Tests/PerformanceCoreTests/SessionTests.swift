@@ -123,3 +123,42 @@ private enum WaitFailure: Error { case timedOut }
     #expect(await sampler.counts().3 <= 1)
     await session.shutdown()
 }
+
+@Test func renewedVisibilityCannotBeReleasedByAnOlderCanceledObserver() async {
+    let session = SamplingSession(sampler: ControlledSampler())
+    let consumer = UUID()
+    let old = await session.acquire(consumerID: consumer, demand: .overview)
+    let fresh = await session.acquire(consumerID: consumer, demand: .overview, renewingExisting: true)
+    #expect(old.id != fresh.id)
+    await session.release(old.id)
+    #expect(await session.subscriberCount == 1)
+    await session.release(fresh.id)
+    await session.shutdown()
+}
+
+private actor AcquisitionGate {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var waiting = false
+    func wait() async { waiting = true; await withCheckedContinuation { continuation = $0 } }
+    func isWaiting() -> Bool { waiting }
+    func resume() { continuation?.resume(); continuation = nil }
+}
+
+@Test func canceledAcquisitionCannotReplaceAHealthyConsumer() async throws {
+    let session = SamplingSession(sampler: ControlledSampler())
+    let consumer = UUID()
+    let healthy = await session.acquire(consumerID: consumer, demand: .overview)
+    let gate = AcquisitionGate()
+    let pending = Task {
+        await gate.wait()
+        return await session.acquire(consumerID: consumer, demand: .overview, renewingExisting: true)
+    }
+    try await waitUntil { await gate.isWaiting() }
+    pending.cancel()
+    await gate.resume()
+    let canceled = await pending.value
+    await session.release(canceled.id)
+    #expect(await session.subscriberCount == 1)
+    await session.release(healthy.id)
+    await session.shutdown()
+}

@@ -18,6 +18,7 @@ let package = Package(
         .target(name: "PerformanceUI", dependencies: ["PerformanceDomain", "PerformanceCore", "PerformanceMacPlatform"]),
         .executableTarget(name: "PerformancePreview", dependencies: ["PerformanceUI", "PerformanceDomain", "PerformanceCore", "PerformanceMacPlatform"]),
         .testTarget(name: "PerformanceCoreTests", dependencies: ["PerformanceDomain", "PerformanceCore"]),
-        .testTarget(name: "PerformancePlatformTests", dependencies: ["PerformanceMacPlatform", "PerformanceCore"])
+        .testTarget(name: "PerformancePlatformTests", dependencies: ["PerformanceMacPlatform", "PerformanceCore"]),
+        .testTarget(name: "PerformanceUITests", dependencies: ["PerformanceUI", "PerformanceDomain", "PerformanceCore"])
     ]
 )

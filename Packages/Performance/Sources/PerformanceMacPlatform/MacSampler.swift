@@ -50,10 +50,10 @@ public struct MacPerformanceSampler: PerformanceSampler {
         if memoryResult == KERN_SUCCESS && pageResult == KERN_SUCCESS {
             let pages = UInt64(vm.active_count) + UInt64(vm.wire_count) + UInt64(vm.compressor_page_count)
             let (bytes, overflow) = pages.multipliedReportingOverflow(by: UInt64(pageSize))
-            used = overflow ? .unavailable(.failed, source: "host_statistics64", reason: "内存计量溢出")
-                : .measured(bytes, at: date, source: "active+wired+compressed")
+            used = overflow ? .unavailable(.failed, source: "host_statistics64:active+wired+compressed", reason: "内存计量溢出")
+                : .measured(bytes, at: date, source: "host_statistics64:active+wired+compressed")
         } else {
-            used = .unavailable(.failed, source: "host_statistics64", reason: "系统内存读取失败")
+            used = .unavailable(.failed, source: "host_statistics64:active+wired+compressed", reason: "系统内存读取失败")
         }
         // Internal sysctl pressure codes differ from notification flags across OS versions.
         // Do not manufacture a pressure percentage from used/total or guess the mapping.
@@ -89,6 +89,7 @@ public struct MacPerformanceSampler: PerformanceSampler {
                     proc_pid_rusage(pid, RUSAGE_INFO_V4, $0)
                 }
             }
+            let usageError = errno
             var nameBytes = [CChar](repeating: 0, count: 1024)
             let length = nameBytes.withUnsafeMutableBytes { proc_name(pid, $0.baseAddress, UInt32($0.count)) }
             let name = length > 0 ? String(decoding: nameBytes.prefix(Int(length)).map { UInt8(bitPattern: $0) }, as: UTF8.self).trimmingCharacters(in: .controlCharacters) : "进程 \(pid)"
@@ -104,10 +105,12 @@ public struct MacPerformanceSampler: PerformanceSampler {
                                   residentBytes: .measured(usage.ri_resident_size, at: date, source: "proc_pid_rusage"),
                                   footprintBytes: .measured(usage.ri_phys_footprint, at: date, source: "proc_pid_rusage")))
             } else {
-                let reason = "进程已退出或访问受限"
+                let denied = usageError == EPERM || usageError == EACCES
+                let reason = denied ? "进程访问受限" : "进程已退出或采集失败"
+                let quality: MetricQuality = denied ? .permissionDenied : .unknown
                 rows.append(.init(pid: pid, identity: nil, name: name, cpuNanoseconds: nil,
-                                  residentBytes: .unavailable(.unknown, source: "proc_pid_rusage", reason: reason),
-                                  footprintBytes: .unavailable(.unknown, source: "proc_pid_rusage", reason: reason)))
+                                  residentBytes: .unavailable(quality, source: "proc_pid_rusage", reason: reason),
+                                  footprintBytes: .unavailable(quality, source: "proc_pid_rusage", reason: reason)))
             }
         }
         let monotonic = Double(mach_absolute_time()) * Double(timebase.numer) / Double(max(1, timebase.denom))

@@ -8,6 +8,11 @@ enum MetricText {
     static func value<T>(_ metric: Metric<T>?, now: Date, threshold: TimeInterval, format: (T) -> String) -> String {
         guard let metric else { return "正在采样" }
         guard let value = metric.value else {
+            if let old = metric.lastKnownValue {
+                let age = metric.lastKnownAt.map { now.timeIntervalSince($0) }
+                let stale = age.map { $0 < 0 || $0 > threshold } ?? true
+                return format(old) + (stale ? " · 上次测量，已过期" : " · 上次测量")
+            }
             switch metric.quality {
             case .warmingUp: return "正在采样"
             case .permissionDenied: return "访问受限"
@@ -65,10 +70,10 @@ public struct OverviewPanel: View {
         self.controller = controller; self.onQuit = onQuit
     }
     public var body: some View {
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-            content(now: context.date)
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            ScrollView { content(now: Date()) }
         }
-        .frame(width: 400)
+        .frame(width: 400, height: 500)
     }
 
     private func content(now: Date) -> some View {
@@ -80,12 +85,12 @@ public struct OverviewPanel: View {
                 Text(Host.current().localizedName ?? "我的 Mac").font(.caption).foregroundStyle(.secondary).lineLimit(2)
             }
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                OverviewCard(title: "CPU", icon: "cpu", value: MetricText.value(s?.cpuPercent, now: now, threshold: 6) { String(format: "%.1f%%", $0) },
-                             detail: "系统整体使用率\n" + MetricText.time(s?.cpuPercent.sampledAt), action: "查看进程", identifier: "overview.cpu") { controller.open(.performance) }
-                OverviewCard(title: "内存", icon: "memorychip", value: MetricText.value(s?.memoryUsedBytes, now: now, threshold: 6, format: MetricText.bytes),
-                             detail: "总量 " + MetricText.value(s?.memoryTotalBytes, now: now, threshold: 6, format: MetricText.bytes) + "\n活跃 + 固定 + 压缩\n压力等级未取得", action: "查看内存占用", identifier: "overview.memory") { controller.open(.performance) }
+                OverviewCard(title: "CPU", icon: "cpu", value: MetricText.value(s?.cpuPercent, now: now, threshold: controller.freshnessSeconds) { String(format: "%.1f%%", $0) },
+                             detail: "系统整体使用率\n" + MetricText.time(s?.cpuPercent.sampledAt ?? s?.cpuPercent.lastKnownAt) + (s?.cpuPercent.value == nil ? "\n" + (s?.cpuPercent.reason ?? "正在采样") : ""), action: "查看进程", identifier: "overview.cpu") { controller.open(.performance) }
+                OverviewCard(title: "内存", icon: "memorychip", value: MetricText.value(s?.memoryUsedBytes, now: now, threshold: controller.freshnessSeconds, format: MetricText.bytes),
+                             detail: "总量 " + MetricText.value(s?.memoryTotalBytes, now: now, threshold: controller.freshnessSeconds, format: MetricText.bytes) + "\n活跃 + 固定 + 压缩\n压力等级未取得", action: "查看内存占用", identifier: "overview.memory") { controller.open(.performance) }
                 OverviewCard(title: "启动盘", icon: "internaldrive", value: MetricText.value(volume?.availableBytes, now: now, threshold: 30, format: MetricText.bytes),
-                             detail: "当前可用空间\n" + MetricText.time(volume?.availableBytes.sampledAt), action: "查看存储", identifier: "overview.storage") { controller.open(.storage) }
+                             detail: "当前可用空间\n" + MetricText.time(volume?.availableBytes.sampledAt ?? volume?.availableBytes.lastKnownAt) + (volume?.availableBytes.value == nil ? "\n" + (volume?.availableBytes.reason ?? "正在采样") : ""), action: "查看存储", identifier: "overview.storage") { controller.open(.storage) }
                 OverviewCard(title: "存储任务", icon: "chart.pie", value: controller.storage.title,
                              detail: controller.storage.detail + (controller.storage.incomplete ? "\n覆盖不完整" : ""),
                              action: "查看任务", identifier: "overview.task") { controller.open(.storage) }

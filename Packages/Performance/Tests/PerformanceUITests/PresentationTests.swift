@@ -1,0 +1,37 @@
+import Foundation
+import Testing
+import PerformanceDomain
+@testable import PerformanceUI
+
+@Test @MainActor func settingsAreNamespacedAndPersistInTheirOwnPreferenceDomain() async throws {
+    let name = "test-only.lmc.performance.\(UUID().uuidString)"
+    let preferences = try #require(UserDefaults(suiteName: name))
+    defer { preferences.removePersistentDomain(forName: name) }
+    preferences.set("sentinel", forKey: "cleaner.existing")
+    let controller = PerformanceController(preferences: preferences)
+    #expect(controller.menuEnabled)
+    #expect(controller.intervalSeconds == 2)
+    controller.menuEnabled = false
+    controller.intervalSeconds = 5
+    controller.intervalSeconds = -1
+    #expect(controller.intervalSeconds == 5)
+    await controller.shutdown()
+    let restored = PerformanceController(preferences: preferences)
+    #expect(!restored.menuEnabled)
+    #expect(restored.intervalSeconds == 5)
+    #expect(preferences.string(forKey: "cleaner.existing") == "sentinel")
+    await restored.shutdown()
+}
+
+@Test func presentationDistinguishesZeroMissingStaleAndHistoricalValues() {
+    let date = Date(timeIntervalSince1970: 100)
+    let now = Date(timeIntervalSince1970: 107)
+    let zero = Metric<Double>.measured(0, at: date, source: "fixture")
+    #expect(MetricText.value(zero, now: now, threshold: 6) { String($0) } == "0.0 · 已过期")
+    let missing = Metric<Double>.unavailable(.unknown, source: "fixture", reason: "unknown")
+    #expect(MetricText.value(missing, now: now, threshold: 6) { String($0) } == "未取得")
+    let failed = Metric<Double>.unavailable(.failed, source: "fixture", reason: "failure").preservingLastMeasurement(from: zero)
+    #expect(MetricText.value(failed, now: now, threshold: 6) { String($0) } == "0.0 · 上次测量，已过期")
+    #expect(failed.quality == .failed)
+    #expect(failed.lastKnownAt == date)
+}

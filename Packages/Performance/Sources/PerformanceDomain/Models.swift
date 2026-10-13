@@ -10,6 +10,8 @@ public struct Metric<Value: Codable & Sendable>: Codable, Sendable {
     public let sampledAt: Date?
     public let source: String
     public let reason: String?
+    public let lastKnownValue: Value?
+    public let lastKnownAt: Date?
 
     public static func measured(_ value: Value, at date: Date, source: String) -> Self {
         Self(value: value, quality: .measured, sampledAt: date, source: source, reason: nil)
@@ -20,12 +22,13 @@ public struct Metric<Value: Codable & Sendable>: Codable, Sendable {
         return Self(value: nil, quality: quality, sampledAt: nil, source: source, reason: reason)
     }
 
-    private init(value: Value?, quality: MetricQuality, sampledAt: Date?, source: String, reason: String?) {
+    private init(value: Value?, quality: MetricQuality, sampledAt: Date?, source: String, reason: String?, lastKnownValue: Value? = nil, lastKnownAt: Date? = nil) {
         self.value = value; self.quality = quality; self.sampledAt = sampledAt
         self.source = source; self.reason = reason
+        self.lastKnownValue = lastKnownValue; self.lastKnownAt = lastKnownAt
     }
 
-    private enum CodingKeys: String, CodingKey { case value, quality, sampledAt, source, reason }
+    private enum CodingKeys: String, CodingKey { case value, quality, sampledAt, source, reason, lastKnownValue, lastKnownAt }
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -34,10 +37,22 @@ public struct Metric<Value: Codable & Sendable>: Codable, Sendable {
         sampledAt = try c.decodeIfPresent(Date.self, forKey: .sampledAt)
         source = try c.decode(String.self, forKey: .source)
         reason = try c.decodeIfPresent(String.self, forKey: .reason)
+        lastKnownValue = try c.decodeIfPresent(Value.self, forKey: .lastKnownValue)
+        lastKnownAt = try c.decodeIfPresent(Date.self, forKey: .lastKnownAt)
         guard (quality == .measured && value != nil && sampledAt != nil)
                 || (quality != .measured && value == nil) else {
             throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Invalid metric quality/value"))
         }
+        guard (lastKnownValue == nil) == (lastKnownAt == nil) else {
+            throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Invalid cached metric"))
+        }
+    }
+
+    public func preservingLastMeasurement(from previous: Self?) -> Self {
+        guard quality != .measured, let previous, previous.source == source else { return self }
+        return Self(value: nil, quality: quality, sampledAt: nil, source: source, reason: reason,
+                    lastKnownValue: previous.value ?? previous.lastKnownValue,
+                    lastKnownAt: previous.sampledAt ?? previous.lastKnownAt)
     }
 
     public func isStale(at now: Date, after interval: TimeInterval) -> Bool {

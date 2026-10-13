@@ -43,7 +43,7 @@ public final class OverviewMenuController: NSObject, NSPopoverDelegate {
         guard let button = item?.button else { return }
         // Create content only while visible; no retained TimelineView when hidden.
         popover.contentViewController = NSHostingController(rootView: OverviewPanel(controller: controller, onQuit: onQuit))
-        popover.contentSize = NSSize(width: 400, height: 450)
+        popover.contentSize = NSSize(width: 400, height: 500)
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         popover.contentViewController?.view.window?.makeKey()
     }

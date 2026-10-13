@@ -26,9 +26,15 @@ public final class PerformanceController {
         didSet { preferences.set(menuEnabled, forKey: "overview.menuEnabled") }
     }
     public var intervalSeconds: Double {
-        didSet { preferences.set(intervalSeconds, forKey: "performance.refreshInterval") }
+        didSet {
+            guard [2.0, 5.0, 10.0].contains(intervalSeconds) else { intervalSeconds = oldValue; return }
+            preferences.set(intervalSeconds, forKey: "performance.refreshInterval")
+            let value = intervalSeconds
+            Task { await session.setInterval(.seconds(value)) }
+        }
     }
     public var navigate: (@MainActor (UtilityRoute) -> Void)?
+    public var freshnessSeconds: TimeInterval { max(6, intervalSeconds * 3) }
     private let preferences: UserDefaults
     public let session: SamplingSession
     private var observers: [NSObjectProtocol] = []
@@ -51,7 +57,7 @@ public final class PerformanceController {
 
     public func observe(consumerID: UUID, demand: SamplingDemand) async {
         guard !Task.isCancelled else { return }
-        let lease = await session.acquire(consumerID: consumerID, demand: demand)
+        let lease = await session.acquire(consumerID: consumerID, demand: demand, renewingExisting: true)
         for await value in lease.snapshots {
             guard !Task.isCancelled else { break }
             if value.sequence >= snapshot.sequence { snapshot = value }
