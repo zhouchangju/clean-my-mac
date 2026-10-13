@@ -52,7 +52,11 @@ public actor SamplingSession {
 
     public func acquire(consumerID: UUID, demand: SamplingDemand) -> SamplingLease {
         if let id = consumerLeases[consumerID], let existing = subscriptions[id] {
-            return SamplingLease(id: id, snapshots: existing.stream)
+            switch existing.continuation.yield(current) {
+            case .terminated: release(id)
+            case .enqueued, .dropped: return SamplingLease(id: id, snapshots: existing.stream)
+            @unknown default: release(id)
+            }
         }
         let pair = AsyncStream<PerformanceSnapshot>.makeStream(bufferingPolicy: .bufferingNewest(1))
         let id = UUID()
