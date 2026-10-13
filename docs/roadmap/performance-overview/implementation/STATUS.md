@@ -81,3 +81,13 @@ sample 3秒指向每秒Timeline重排完整进程样本；新增controller ranki
 新main-build-ranking-cache正在build（本轮结束后查进程/日志），未launch新版本；PID28834仍是旧binary。切换前确认另一AI UI job已结束，再只正常退出/停止本轮精确private review进程。新资源验证要新源hash、新binary；不得继承旧基线/18测试当全部软件PASS。goal active。
 
 排行缓存修复的新main-build-ranking-cache.log已BUILD SUCCEEDED；原runtime PID28834仍旧binary，未启动新版本或新collector。18项Release tests已通过，新资源预算仍需fresh runtime复验。
+
+## 最新续接：新缓存版本及50次原生切换
+
+旧PID28834已精确SIGTERM且确认终态；已使用main-build-ranking-cache成功binary复制独立performance-review bundle并签名启动。binary与性能源hash：ranking-cache-runtime-manifest.json。当前新App PID50114，仅-lmcUITest -lmcPerformanceDiagnostics，自建目录LMC-UI-29CBE3B3-4B84-4D1B-B9A1-C2DD9C244464；active-diagnostics.json已指向新日志。
+
+CUA 20+20+2+8次已确认性能/存储切换共50次；第43次一度AX树缺导航，重新读取原窗口恢复，再完成剩余8次，没有伪记失败为成功。最终storage日志subscriber0，sequence25；processSampleCount944为最后缓存，不代表继续枚举。原始native-switches-50.json；RSS终态约100MiB，缺同系列稳定前值，不将它直接记为增长<=10MiB通过。
+
+已经切回默认完整CPU排行且无搜索，启动新collector：工具会话34368，命令collect_resources.py detail-cache --subscribers 1 --route performance --duration 930，PID50114。这是修复后新版本复验，不是重启旧失败collector；旧失败JSON与sample保留。先poll这个exacthandle，完成后读resource-detail-cache.json的3个真实>=300秒区间。期间不得改变当前页面/打开菜单；不要重复采集。
+
+剩余完整验收与人工交付条件没有降低；goal active。
