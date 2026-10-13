@@ -91,3 +91,11 @@ CUA 20+20+2+8次已确认性能/存储切换共50次；第43次一度AX树缺导
 已经切回默认完整CPU排行且无搜索，启动新collector：工具会话34368，命令collect_resources.py detail-cache --subscribers 1 --route performance --duration 930，PID50114。这是修复后新版本复验，不是重启旧失败collector；旧失败JSON与sample保留。先poll这个exacthandle，完成后读resource-detail-cache.json的3个真实>=300秒区间。期间不得改变当前页面/打开菜单；不要重复采集。
 
 剩余完整验收与人工交付条件没有降低；goal active。
+
+## 最新：新缓存版3组资源结果仍FAIL
+
+collector34368已exit0，完成930.01秒；不是running，不重复启动。resource-detail-cache.json三段各>=300秒CPU分别3.164%、3.442%、4.238%，全部高于3%预算；RSS中位89.33/88.16/88.13MiB。数据完整但性能验收FAIL，不能把exit0当PASS。
+
+新sample50114 3秒保留detail-cache-runtime-sample.txt。完整排行重算路径从早先747份主要栈降到22份（不同瞬时窗口，不是正式成本比例）；剩余SwiftUI布局/刷新还需定位。PID50114仍旧缓存版App存活、性能页1订阅，当前没有collector。换版本前验证精确进程，避免触及另一AI。
+
+本轮50原生切换与resource结果已取得，尚未完成CPU修复/所有验收，goal保持active；下一步针对新sample确定第二批最小优化，再18tests/newbuild/new runtime重复3组，原FAIL全部保留。
