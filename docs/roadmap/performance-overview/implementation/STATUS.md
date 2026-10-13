@@ -121,3 +121,13 @@ collector34368终态exit0；旧81046终态exit1。PID50114精确身份核对后�
 本轮过期边界修复已提交1e60b8c，性能Release19项测试和主AppRelease构建通过。新私有制品签名verify成功。资源collector在85.24秒因用户要求暂停被精确SIGTERM，工具会话78685终态exit143；18样本临时CPU2.006%、RSS118.84MiB，不足5分钟，正式预算仍UNVERIFIED。resource-detail-expiration-paused.json保留原因；旧3组FAIL不变。
 
 私有验证App PID81482已正常CmdQ退出，collector82456与App均确认不存在。没有停止另一AI遗留真实扫描。完整恢复入口为仓库根PERFORMANCE-HANDOFF.md；所有旧PID/临时目录重启后重新验证。本轮任务暂停，不再推进或请求人工验收。
+
+## 2026-10-13 重启续接：详情CPU正式通过，原生控制受阻
+
+用户指令“按交接文档继续”已解除暂停。恢复核对31个source hash及binary SHA全部一致；同源独立bundle签名verify exit0。详情collector80399 exit0/930.023秒，3段均约301秒，CPU1.781/1.857/1.871%均满足3%。PID5600测后CmdQ正常退出，ps确认不存在。
+
+冷启动存储基线collector22385 exit0/310.013秒，有效300.994秒CPU0.063%、RSS中位94.75MiB，subscriber0/sequence0始终不变。详情中位RSS增量41.08/29.33/29.28MiB；启动瞬时峰值增量57.77MiB不隐去，未替代50切换验收。最新性能19实际tests和存储54实际tests/3skip均exit0；Trash仍只通过拒权限恢复分支，不打开Gate。
+
+随后CUA针对当前私有实例无法取窗口，连续cgWindowNotFound；reset/path/bundle/重新激活均未恢复。App/诊断仍正常，不判App崩溃，不擅自判断用户锁屏。用户桌面状态问题待答。无活跃collector；后续概览/双入口/隐藏/菜单/设置/生命周期等原生验证仍UNVERIFIED。完整证据与后续范围见REBOOT-VERIFICATION.md，仍未达到人工验收条件。
+
+收尾fresh核对PID21141私有路径/fixture参数和无任务/零订阅诊断后，仅SIGTERM该验证实例，确认终态；这不算正常退出PASS。31个source hash再核对相同。原存储PID582未操作；没有本轮应用/collector残留。下次原生控制恢复后重新发现新fixture/PID继续概览等剩余验收。
