@@ -43,3 +43,15 @@ UI与额外宿主校准将作为下一功能提交；不暂存另一AI的未跟�
 - 对方UI测试多次重启；发现live xcodebuild即停止本轮独立验证App。已精确停止本轮trace PID19168及review PID89906；两者终态，无本轮残留collector。不停止另一AI的App/test进程。
 
 剩余：最新原生性能页/跳转/关闭后重开/退出验证，17测试后同版本全清理回归、第三功能接入证明、30次首画与50次切页、5分钟×3各模式资源样本、扫描并行/多屏/辅助功能、同源最终制品与18AC逐项审计。主App接入源部分仍未跟踪，另一AI清理源仍在开发；只提交本轮独占文件，共享App源码基线提交在交接明确后处理。
+
+## 最新交接点
+
+94b72bf已提交App桥接/生命周期/失败历史值/17项回归；共享原App入口及pbx仍未跟踪，另一AI保留挂接并改async index，不覆盖、不混入其提交。
+
+主App最新build-observation-generation与build-diagnostics-append均exit0；性能17tests exit0；原清理package regression报告53项正常退出（3 opt-in须按实际skip记录，不等完整M2）。
+
+最新独立review bundle原生走查：性能页搜索自身进程与Footprint排序可用；CPU/内存/空间卡新样本不再误标过期；菜单CPU卡返回同一lmc-main性能页；Cmd-Q后PID73247已不存在，正常退出通过。点击关窗后CUA读取可能重新打开窗口，不能把该观察当隐藏状态验证。
+
+为后续隐藏/资源验证新增-lmcUITest且-lmcPerformanceDiagnostics双开关，仅写本应用自建LMC-UI-*目录中的0600 performance-diagnostics.jsonl。数据只有本App pid/seq/订阅数/可见标题窗口数/扫描与准备状态/采样进程数/路由，不含进程名称或命令参数。追加记录不覆盖旧证据。最新诊断版本已build，未launch；本轮所有旧trace/review进程已结束，当前没有本轮活跃App/collector。
+
+下一步：检查另一AI当前UI job与源改动；用最新main binary复制distinct performance-review bundle，带两个测试flag启动，查其自建目录log。用日志区分真正关窗和CUA自动重开，验证零订阅停止及重开；正常菜单/设置开关与扫描并行，30次面板/50次切页与5min×3资源模式，辅助功能/多屏、第三模块mock和最终18AC归档。再解决共享App基线提交与最终同源制品。不要把本轮原生分项或17tests记为全面完成。

@@ -13,12 +13,14 @@ final class UtilityApplication {
     private var menu: OverviewMenuController?
     private var observing = true
     private var observationGeneration: UInt64 = 0
+    private var diagnosticsTask: Task<Void, Never>?
     private(set) var quitting = false
 
     private init() { observeStorage() }
 
     func install(openWindow: @escaping @MainActor () -> Void) {
         storage.prepareIndex() // Idempotent; preparation belongs to the App, not a selected page.
+        startFixtureDiagnosticsIfRequested()
         if menu == nil {
             menu = OverviewMenuController(controller: performance) { NSApp.terminate(nil) }
         }
@@ -33,6 +35,41 @@ final class UtilityApplication {
 
     func updateMenu() { menu?.setEnabled(performance.menuEnabled) }
     func toggleOverview() { menu?.toggle() }
+
+    private func startFixtureDiagnosticsIfRequested() {
+        let args = ProcessInfo.processInfo.arguments
+        guard diagnosticsTask == nil, args.contains("-lmcUITest"), args.contains("-lmcPerformanceDiagnostics") else { return }
+        let directory = URL(fileURLWithPath: storage.storagePath, isDirectory: true)
+        guard directory.lastPathComponent.hasPrefix("LMC-UI-") else { return }
+        let output = directory.appendingPathComponent("performance-diagnostics.jsonl")
+        if !FileManager.default.fileExists(atPath: output.path) {
+            guard FileManager.default.createFile(atPath: output.path, contents: nil, attributes: [.posixPermissions: 0o600]) else { return }
+        }
+        guard let handle = try? FileHandle(forWritingTo: output), (try? handle.seekToEnd()) != nil else { return }
+        diagnosticsTask = Task { @MainActor [weak self] in
+            defer { try? handle.close() }
+            while !Task.isCancelled {
+                guard let self, !self.quitting else { break }
+                let current = await self.performance.session.snapshot()
+                let subscribers = await self.performance.session.subscriberCount
+                let record: [String: Any] = [
+                    "timestamp": Date().timeIntervalSince1970,
+                    "pid": ProcessInfo.processInfo.processIdentifier,
+                    "sequence": current.sequence,
+                    "subscribers": subscribers,
+                    "visibleMainWindows": NSApp.windows.filter { $0.styleMask.contains(.titled) && $0.isVisible && !$0.isMiniaturized }.count,
+                    "scanning": self.storage.scanning,
+                    "preparingIndex": self.storage.preparingIndex,
+                    "processSampleCount": current.processes.count,
+                    "route": self.performance.route.rawValue
+                ]
+                if let data = try? JSONSerialization.data(withJSONObject: record, options: [.sortedKeys]) {
+                    try? handle.write(contentsOf: data + Data([10]))
+                }
+                do { try await Task.sleep(for: .seconds(1)) } catch { break }
+            }
+        }
+    }
 
     private func observeStorage() {
         guard observing else { return }
@@ -90,6 +127,7 @@ final class UtilityApplication {
     func terminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard !quitting else { return .terminateLater }
         quitting = true
+        diagnosticsTask?.cancel(); diagnosticsTask = nil
         observing = false
         observationGeneration &+= 1
         menu?.shutdown()
