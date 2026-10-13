@@ -115,3 +115,9 @@ collector34368终态exit0；旧81046终态exit1。PID50114精确身份核对后�
 另一AI已结束任务，未修改其存储源码或停止其遗留真实扫描PID62394。当前存储状态记录仍有TCC等待；它不影响独立fixture验证，但不得视为完整主盘PASS。
 
 性能UI的1Hz全列表刷新改为显式过期边界刷新，采样仍2秒。Release19项实际测试通过，主App新Release构建中；新运行时CPU验收尚未完成。详情上一版本3组FAIL仍有效，未准备交人工验收。
+
+## 用户要求关机：主动暂停
+
+本轮过期边界修复已提交1e60b8c，性能Release19项测试和主AppRelease构建通过。新私有制品签名verify成功。资源collector在85.24秒因用户要求暂停被精确SIGTERM，工具会话78685终态exit143；18样本临时CPU2.006%、RSS118.84MiB，不足5分钟，正式预算仍UNVERIFIED。resource-detail-expiration-paused.json保留原因；旧3组FAIL不变。
+
+私有验证App PID81482已正常CmdQ退出，collector82456与App均确认不存在。没有停止另一AI遗留真实扫描。完整恢复入口为仓库根PERFORMANCE-HANDOFF.md；所有旧PID/临时目录重启后重新验证。本轮任务暂停，不再推进或请求人工验收。
