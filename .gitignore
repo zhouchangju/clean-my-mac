@@ -1,0 +1,6 @@
+.local/
+.DS_Store
+.build/
+App/*.xcodeproj/xcuserdata/
+*.xcuserstate
+.swiftpm/
