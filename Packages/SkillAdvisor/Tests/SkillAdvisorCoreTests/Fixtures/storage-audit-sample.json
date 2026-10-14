@@ -1,0 +1,358 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-14T00:41:00.875466+00:00",
+  "mode": "read_only_audit",
+  "home": "/Users/sample",
+  "internal": {
+    "path": "/Users/sample",
+    "total_bytes": 494384795648,
+    "used_bytes": 457918595072,
+    "available_bytes": 36466200576,
+    "capacity_percent": 92.6,
+    "device_id": 16777232
+  },
+  "external_volumes": [
+    {
+      "path": "/Volumes/身外化身",
+      "total_bytes": 1023999787008,
+      "used_bytes": 381996306432,
+      "available_bytes": 642003480576,
+      "capacity_percent": 37.3,
+      "device_id": 16777240,
+      "volume_uuid": "66703294-C009-40B7-867D-7B5C55E0409C",
+      "filesystem": "APFS",
+      "protocol": "USB",
+      "solid_state": true,
+      "writable": true,
+      "internal": false,
+      "device_identifier": "disk5s1"
+    }
+  ],
+  "scopes": [
+    {
+      "path": "/Users/sample/git",
+      "scope": "git",
+      "classification": "REVIEW_PROJECTS",
+      "actual_bytes": 101194727424,
+      "logical_bytes": 98453581824,
+      "sparse_candidate": false,
+      "warning": null,
+      "children": [
+        {
+          "path": "/Users/sample/git/gitlab-outer",
+          "actual_bytes": 14212329472,
+          "logical_bytes": 13809012736,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/git/clean-my-mac",
+          "actual_bytes": 11676622848,
+          "logical_bytes": 11398006784,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/git/.apartment.mac-storage-guardian-b98d9989.rollback",
+          "actual_bytes": 7516712960,
+          "logical_bytes": 7498554368,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/Documents",
+      "scope": "Documents",
+      "classification": "MIGRATION_CANDIDATE",
+      "actual_bytes": 36601274368,
+      "logical_bytes": 35974529024,
+      "sparse_candidate": false,
+      "warning": null,
+      "children": [
+        {
+          "path": "/Users/sample/Documents/Obsidian Vault",
+          "actual_bytes": 10735403008,
+          "logical_bytes": 10598576128,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Documents/.Obsidian-Backup-20260918.mac-storage-guardian-3576f576.rollback",
+          "actual_bytes": 8899551232,
+          "logical_bytes": 8777376768,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Documents/.Obsidian-Vault-Before-Notion-20260918.mac-storage-guardian-3576f576.rollback",
+          "actual_bytes": 7289241600,
+          "logical_bytes": 7191430144,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/Downloads",
+      "scope": "Downloads",
+      "classification": "REVIEW_ARCHIVE_SELECTED",
+      "actual_bytes": 3481247744,
+      "logical_bytes": 3456185344,
+      "sparse_candidate": false,
+      "warning": null,
+      "children": [
+        {
+          "path": "/Users/sample/Downloads/优质短信息图库.zip",
+          "actual_bytes": 340561920,
+          "logical_bytes": 340560650,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Downloads/Qoder CN Installer.app",
+          "actual_bytes": 253804544,
+          "logical_bytes": 253768704,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Downloads/Qoder-CN-Installer-mac-arm64.zip",
+          "actual_bytes": 251797504,
+          "logical_bytes": 251795950,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/Movies",
+      "scope": "Movies",
+      "classification": "MIGRATION_CANDIDATE",
+      "actual_bytes": 57978880,
+      "logical_bytes": 57996288,
+      "sparse_candidate": false,
+      "warning": null,
+      "children": [
+        {
+          "path": "/Users/sample/Movies/2026-08-04 07-54-54.mov",
+          "actual_bytes": 56840192,
+          "logical_bytes": 56838994,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Movies/2026-08-04 07-44-38.mov",
+          "actual_bytes": 1089536,
+          "logical_bytes": 1086543,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Movies/Videos",
+          "actual_bytes": 40960,
+          "logical_bytes": 62464,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/Library/Caches",
+      "scope": "Library/Caches",
+      "classification": "REVIEW_REBUILDABLE",
+      "actual_bytes": 9398915072,
+      "logical_bytes": 9113929728,
+      "sparse_candidate": false,
+      "warning": "du: /Users/sample/Library/Caches/familycircled: Operation not permitted\ndu: /Users/sample/Library/Caches/com.apple.HomeKit: Operation not permitted\ndu: /Users/s | …(共 2 条 du 警告，样例中截断)",
+      "children": [
+        {
+          "path": "/Users/sample/Library/Caches/ms-playwright",
+          "actual_bytes": 1489883136,
+          "logical_bytes": 1476442112,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Library/Caches/pnpm",
+          "actual_bytes": 1202126848,
+          "logical_bytes": 1198645248,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Library/Caches/Citro Labs",
+          "actual_bytes": 1054810112,
+          "logical_bytes": 955254784,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/Library/Application Support",
+      "scope": "Library/Application Support",
+      "classification": "REVIEW_APP_DATA",
+      "actual_bytes": 44308189184,
+      "logical_bytes": 43266518016,
+      "sparse_candidate": false,
+      "warning": "du: /Users/sample/Library/Application Support/discord: Operation not permitted\ndu: /Users/sample/Library/Application Support/LogiOptionsPlus/sentry_db_logioptio | …(共 2 条 du 警告，样例中截断)",
+      "children": [
+        {
+          "path": "/Users/sample/Library/Application Support/Vanish",
+          "actual_bytes": 12095819776,
+          "logical_bytes": 11974249472,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Library/Application Support/Google",
+          "actual_bytes": 5811765248,
+          "logical_bytes": 5705523200,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Library/Application Support/Notion",
+          "actual_bytes": 4661526528,
+          "logical_bytes": 4450210816,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/Library/Containers",
+      "scope": "Library/Containers",
+      "classification": "REVIEW_APP_DATA",
+      "actual_bytes": 1577431040,
+      "logical_bytes": 34895830016,
+      "sparse_candidate": true,
+      "warning": "du: /Users/sample/Library/Containers/com.apple.Passwords.PasswordSettingsAppIntentsExtension/Data: Operation not permitted\ndu: /Users/sample/Library/Containers/ | …(共 2 条 du 警告，样例中截断)",
+      "children": [
+        {
+          "path": "/Users/sample/Library/Containers/com.docker.docker",
+          "actual_bytes": 1086910464,
+          "logical_bytes": 34397294592,
+          "sparse_candidate": true,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Library/Containers/com.tencent.yuanbao",
+          "actual_bytes": 336576512,
+          "logical_bytes": 335964160,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Library/Containers/com.xunlei.mvideo",
+          "actual_bytes": 50270208,
+          "logical_bytes": 50275328,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/Library/pnpm",
+      "scope": "Library/pnpm",
+      "classification": "REVIEW_REBUILDABLE",
+      "actual_bytes": 8643596288,
+      "logical_bytes": 7892476928,
+      "sparse_candidate": false,
+      "warning": null,
+      "children": [
+        {
+          "path": "/Users/sample/Library/pnpm/store",
+          "actual_bytes": 7651545088,
+          "logical_bytes": 6910328832,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Library/pnpm/package-manager-store",
+          "actual_bytes": 937971712,
+          "logical_bytes": 933900288,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/Library/pnpm/.tools",
+          "actual_bytes": 54059008,
+          "logical_bytes": 48232448,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/.cache",
+      "scope": ".cache",
+      "classification": "REVIEW_REBUILDABLE",
+      "actual_bytes": 2224594944,
+      "logical_bytes": 2157593600,
+      "sparse_candidate": false,
+      "warning": null,
+      "children": [
+        {
+          "path": "/Users/sample/.cache/codex-runtimes",
+          "actual_bytes": 1899552768,
+          "logical_bytes": 1838988288,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/.cache/whisper",
+          "actual_bytes": 145264640,
+          "logical_bytes": 145263616,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/.cache/cycles",
+          "actual_bytes": 62267392,
+          "logical_bytes": 62192640,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    },
+    {
+      "path": "/Users/sample/.npm",
+      "scope": ".npm",
+      "classification": "REVIEW_REBUILDABLE",
+      "actual_bytes": 2036969472,
+      "logical_bytes": 1881935872,
+      "sparse_candidate": false,
+      "warning": null,
+      "children": [
+        {
+          "path": "/Users/sample/.npm/_cacache",
+          "actual_bytes": 981004288,
+          "logical_bytes": 975476736,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/.npm/_npx",
+          "actual_bytes": 979218432,
+          "logical_bytes": 831090688,
+          "sparse_candidate": false,
+          "warning": null
+        },
+        {
+          "path": "/Users/sample/.npm/registry.npmmirror.com",
+          "actual_bytes": 48201728,
+          "logical_bytes": 47750144,
+          "sparse_candidate": false,
+          "warning": null
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "actual_bytes is allocated storage; logical_bytes is apparent file length",
+    "permission warnings are blind spots, not empty directories",
+    "migration candidates still require agent review and user confirmation"
+  ]
+}
